@@ -8,12 +8,13 @@
 
 
     <Button
+        android:layout_margin="5dp"
         android:id="@+id/scan_bt"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="扫描设备"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/close_bt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -21,8 +22,53 @@
         android:id="@+id/stop_scan"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
         android:text="停止扫描"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/read_bt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scan_bt" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dervice_rl"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stop_scan" />
+
+    <Button
+        android:id="@+id/close_bt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="关闭"
+        app:layout_constraintBottom_toBottomOf="@+id/scan_bt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scan_bt"
+        app:layout_constraintTop_toTopOf="@+id/scan_bt" />
+
+    <Button
+        android:id="@+id/read_bt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="读"
+        android:layout_margin="5dp"
+        app:layout_constraintStart_toEndOf="@+id/stop_scan"
+        app:layout_constraintBottom_toBottomOf="@+id/stop_scan"
+        app:layout_constraintEnd_toStartOf="@+id/write_bt"
+        app:layout_constraintTop_toTopOf="@+id/stop_scan" />
+
+    <Button
+        android:id="@+id/write_bt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="写"
+        android:layout_margin="5dp"
+        app:layout_constraintStart_toEndOf="@+id/read_bt"
+        app:layout_constraintBottom_toBottomOf="@+id/read_bt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/read_bt" />
 </androidx.constraintlayout.widget.ConstraintLayout>
