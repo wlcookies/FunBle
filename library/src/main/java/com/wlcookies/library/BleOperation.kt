@@ -155,8 +155,10 @@ class BleOperation : Fragment() {
         when (isScan) {
             true -> {
                 Handler().postDelayed({
-                    stopScan()
-                    mScanning = false
+                    if (mScanning) {
+                        stopScan()
+                        mScanning = false
+                    }
                 }, SCAN_PERIOD)
                 startScan()
                 mScanning = true
@@ -193,8 +195,10 @@ class BleOperation : Fragment() {
     }
 
     fun doStopScan() {
-        stopScan()
-        mScanning = false
+        if (mScanning) {
+            stopScan()
+            mScanning = false
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

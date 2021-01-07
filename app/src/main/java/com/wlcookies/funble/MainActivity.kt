@@ -7,6 +7,7 @@ import android.content.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -53,6 +54,12 @@ class MainActivity : AppCompatActivity() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     intent?.let { i ->
                         when (i.action) {
+                            ACTION_GATT_CONNECTING -> {
+                                "连接中---------------------".log()
+                            }
+                            ACTION_GATT_CONNECT_TIMEOUT -> {
+                                "连接超时---------------------${Thread.currentThread().name}".log()
+                            }
                             ACTION_GATT_CONNECTED -> {
                                 "连接成功---------------------".log()
                             }
@@ -86,6 +93,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }, IntentFilter().apply {
                 this.addAction(ACTION_GATT_CONNECTED)
+                this.addAction(ACTION_GATT_CONNECTING)
+                this.addAction(ACTION_GATT_CONNECT_TIMEOUT)
                 this.addAction(ACTION_GATT_DISCONNECTED)
                 this.addAction(ACTION_GATT_SERVICES_DISCOVERED)
                 this.addAction(ACTION_GATT_SERVICES_DISCOVERED_FAIL)

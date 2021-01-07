@@ -11,7 +11,10 @@ import com.wlcookies.library.util.ByteUtil
 import java.util.*
 
 const val ACTION_GATT_CONNECTED = "com.wlcookies.library.ACTION_GATT_CONNECTED"
+const val ACTION_GATT_CONNECTING = "com.wlcookies.library.ACTION_GATT_CONNECTING"
+const val ACTION_GATT_CONNECT_TIMEOUT = "com.wlcookies.library.ACTION_GATT_CONNECT_TIMEOUT"
 const val ACTION_GATT_DISCONNECTED = "com.wlcookies.library.ACTION_GATT_DISCONNECTED"
+
 
 const val ACTION_GATT_SERVICES_DISCOVERED = "com.wlcookies.library.ACTION_GATT_SERVICES_DISCOVERED"
 const val ACTION_GATT_SERVICES_DISCOVERED_FAIL =
@@ -41,6 +44,8 @@ class BleOperationService : Service() {
     private var discoverServicesRunnable: Runnable? = null
     private var handle = Handler()
 
+    private var connectTimer: Timer? = null //判断连接超时的定时器
+
     private val bluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
@@ -69,16 +74,22 @@ class BleOperationService : Service() {
                             } else if (bondState == BOND_BONDING) {
                                 "等待绑定完成".log()
                             }
+                            cancelConnectTimer()
                         }
                         BluetoothProfile.STATE_DISCONNECTED -> {// 连接失败
-                            bluetoothGatt?.close()
+//                            bluetoothGatt?.close()
+                            release()
                             broadcastUpdate(ACTION_GATT_DISCONNECTED)
+
+                            cancelConnectTimer()
                         }
                     }
                 }
                 else -> {
-                    bluetoothGatt?.close()
+//                    bluetoothGatt?.close()
+                    release()
                     broadcastUpdate(ACTION_GATT_DISCONNECTED)
+                    cancelConnectTimer()
                 }
             }
         }
@@ -88,15 +99,15 @@ class BleOperationService : Service() {
             when (status) {
                 BluetoothGatt.GATT_SUCCESS -> {
                     broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED)
-//                    gatt?.services?.forEach {
-//                        "服务UUID：${it.uuid}\n服务type：${it.type}".log()
-//                        it.characteristics?.forEach { c ->
-//                            "特征UUID：${c.uuid}\n特征type：${it.type}".log()
-//                            c.descriptors.forEach { d ->
-//                                "描述UUID：${d.uuid}".log()
-//                            }
-//                        }
-//                    }
+                    gatt?.services?.forEach {
+                        "服务UUID：${it.uuid}\n服务type：${it.type}".log()
+                        it.characteristics?.forEach { c ->
+                            "特征UUID：${c.uuid}\n特征type：${it.type}".log()
+                            c.descriptors.forEach { d ->
+                                "描述UUID：${d.uuid}".log()
+                            }
+                        }
+                    }
                 }
                 else -> {
                     broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED_FAIL)
@@ -259,8 +270,42 @@ class BleOperationService : Service() {
     fun connect(bd: BluetoothDevice) {
         release()
         bluetoothDevice = bd
-        bluetoothGatt = bd.connectGatt(this, true, bluetoothGattCallback)
+
+        broadcastUpdate(ACTION_GATT_CONNECTING)// 开始连接
+
+        bluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            bd.connectGatt(this, false, bluetoothGattCallback, TRANSPORT_LE)
+        } else {
+            bd.connectGatt(this, false, bluetoothGattCallback)
+        }
+
+        startConnectTimer()
     }
+
+    /**
+     * 开启连接定时器
+     */
+    private fun startConnectTimer() {
+        cancelConnectTimer()
+        connectTimer = Timer().apply {
+            this.schedule(object : TimerTask() {
+                override fun run() {
+                    broadcastUpdate(ACTION_GATT_CONNECT_TIMEOUT)
+                    bluetoothDevice?.let {
+                        connect(it)
+                    }
+                }
+            }, 10 * 1000L)
+        }
+    }
+
+    private fun cancelConnectTimer() {
+        if (connectTimer != null) {
+            connectTimer?.cancel()
+            connectTimer = null
+        }
+    }
+
 
     /**
      * 发送广播
@@ -270,10 +315,9 @@ class BleOperationService : Service() {
     }
 
     private fun broadcastUpdate(action: String, characteristic: BluetoothGattCharacteristic) {
-        //  "特征读取的结果：${ByteUtil.byteArrayToHexString(characteristic.value)}".log()
         val intent = Intent(action)
-        intent.putExtra(EXTRA_DATA_UUID,characteristic.uuid.toString())
-        intent.putExtra(EXTRA_DATA_CONTENT,ByteUtil.byteArrayToHexString(characteristic.value))
+        intent.putExtra(EXTRA_DATA_UUID, characteristic.uuid.toString())
+        intent.putExtra(EXTRA_DATA_CONTENT, ByteUtil.byteArrayToHexString(characteristic.value))
         LocalBroadcastManager.getInstance(this@BleOperationService).sendBroadcast(intent)
     }
 }
