@@ -86,6 +86,12 @@ class MainActivity : AppCompatActivity() {
                             ACTION_DATA_WRITE_FAIL -> {
                                 "写入数据失败---------------------".log()
                             }
+                            ACTION_DATA_NOTIFICATION_SUCCESS -> {
+
+                            }
+                            ACTION_DATA_WRITE_FAIL -> {
+                                "写入数据失败---------------------".log()
+                            }
                             else -> {
                             }
                         }
@@ -102,6 +108,8 @@ class MainActivity : AppCompatActivity() {
                 this.addAction(ACTION_DATA_AVAILABLE_FAIL)
                 this.addAction(ACTION_DATA_WRITE_SUCCESS)
                 this.addAction(ACTION_DATA_WRITE_FAIL)
+                this.addAction(ACTION_DATA_NOTIFICATION_SUCCESS)
+                this.addAction(ACTION_DATA_NOTIFICATION_FAIL)
             }
         )
 

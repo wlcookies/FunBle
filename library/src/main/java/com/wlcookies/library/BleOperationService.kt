@@ -15,7 +15,6 @@ const val ACTION_GATT_CONNECTING = "com.wlcookies.library.ACTION_GATT_CONNECTING
 const val ACTION_GATT_CONNECT_TIMEOUT = "com.wlcookies.library.ACTION_GATT_CONNECT_TIMEOUT"
 const val ACTION_GATT_DISCONNECTED = "com.wlcookies.library.ACTION_GATT_DISCONNECTED"
 
-
 const val ACTION_GATT_SERVICES_DISCOVERED = "com.wlcookies.library.ACTION_GATT_SERVICES_DISCOVERED"
 const val ACTION_GATT_SERVICES_DISCOVERED_FAIL =
     "com.wlcookies.library.ACTION_GATT_SERVICES_DISCOVERED_FAIL"
@@ -25,6 +24,10 @@ const val ACTION_DATA_AVAILABLE_FAIL = "com.wlcookies.library.ACTION_DATA_AVAILA
 
 const val ACTION_DATA_WRITE_SUCCESS = "com.wlcookies.library.ACTION_DATA_WRITE_SUCCESS"
 const val ACTION_DATA_WRITE_FAIL = "com.wlcookies.library.ACTION_DATA_WRITE_FAIL"
+
+const val ACTION_DATA_NOTIFICATION_SUCCESS =
+    "com.wlcookies.library.ACTION_DATA_NOTIFICATION_SUCCESS"
+const val ACTION_DATA_NOTIFICATION_FAIL = "com.wlcookies.library.ACTION_DATA_NOTIFICATION_FAIL"
 
 const val EXTRA_DATA_UUID = "com.wlcookies.library.EXTRA_DATA_UUID"
 const val EXTRA_DATA_CONTENT = "com.wlcookies.library.EXTRA_DATA_CONTENT"
@@ -237,6 +240,9 @@ class BleOperationService : Service() {
             }
         if ((bluetoothGatt?.writeDescriptor(descriptor) == true)) {
             "蓝牙设备在数据改变时，通知App，App在收到数据后回调onCharacteristicChanged方法: ".log()
+            broadcastUpdate(ACTION_DATA_NOTIFICATION_SUCCESS)
+        } else {
+            broadcastUpdate(ACTION_DATA_NOTIFICATION_FAIL)
         }
     }
 
